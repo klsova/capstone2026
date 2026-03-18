@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import Reports from './components/Reports';
 import Notifications from './components/Notifications';
+import FacilitySelection from './components/FacilitySelection';
 
 const App = () => {
   return (
@@ -14,11 +15,11 @@ const App = () => {
         <Sidebar />
         <Box component="main" sx={{ flexGrow: 1, overflow: 'auto' }}>
           <Routes>
+            <Route path="/" element={<FacilitySelection />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Box>
       </Box>

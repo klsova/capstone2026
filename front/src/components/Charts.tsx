@@ -3,7 +3,14 @@ import CumulativeChart from './CumulativeChart';
 import PeakDetectionChart from './PeakDetectionChart';
 import HourlyActivityChart from './HourlyActivityChart';
 
-const Charts = () => {
+interface ChartProps {
+  facility: string;
+  startDate: string;
+  endDate: string;
+}
+
+const Charts: React.FC<ChartProps> = ({ facility, startDate, endDate }) => {
+  console.log(facility, startDate, endDate);
   return (
     <Grid container spacing={3}>
       {/*Tuntikaavio*/}
