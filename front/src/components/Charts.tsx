@@ -3,14 +3,15 @@ import CumulativeChart from './CumulativeChart';
 import PeakDetectionChart from './PeakDetectionChart';
 import HourlyActivityChart from './HourlyActivityChart';
 
-interface ChartProps {
+interface ChartsProps {
   facility: string;
   startDate: string;
   endDate: string;
 }
 
-const Charts: React.FC<ChartProps> = ({ facility, startDate, endDate }) => {
+const Charts: React.FC<ChartsProps> = ({ facility, startDate, endDate }) => {
   console.log(facility, startDate, endDate);
+
   return (
     <Grid container spacing={3}>
       {/*Tuntikaavio*/}
@@ -43,7 +44,7 @@ const Charts: React.FC<ChartProps> = ({ facility, startDate, endDate }) => {
             boxSizing: 'border-box',
           }}
         >
-          <CumulativeChart />
+          <CumulativeChart startDate={startDate} endDate={endDate} />
         </Paper>
       </Grid>
 
@@ -59,7 +60,7 @@ const Charts: React.FC<ChartProps> = ({ facility, startDate, endDate }) => {
             color: 'text.secondary',
           }}
         >
-          <PeakDetectionChart />
+          <PeakDetectionChart startDate={startDate} endDate={endDate} />
         </Paper>
       </Grid>
     </Grid>

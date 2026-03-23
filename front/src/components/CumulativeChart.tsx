@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ComposedChart,
   Line,
@@ -9,8 +9,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Area,
 } from 'recharts';
 import { Box, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import dayjs from 'dayjs';
+
+interface CumulativeChartProps {
+  startDate: string;
+  endDate: string;
+}
 
 // Mielivaltaista "testidataa"
 const dailyData = [
@@ -27,7 +34,7 @@ const weeklyData = [
   { time: 'Week 3', cumulative: 2200, limit: 2250 },
 ];
 
-const CumulativeChart = () => {
+const CumulativeChart: React.FC<CumulativeChartProps> = () => {
   const [view, setView] = useState<'daily' | 'weekly'>('daily');
 
   const handleViewChange = (
