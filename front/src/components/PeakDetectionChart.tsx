@@ -117,13 +117,13 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+      {/* <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
         Peak Detection: {facility}
       </Typography>
       <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
         1.1.2025 - 1.1.2026 --demo--
       </Typography>
-
+*/}
       {filteredData.length === 0 ? (
         <Box
           sx={{
@@ -168,9 +168,6 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                 stroke="#60c9f8"
                 fill="fff"
                 travellerWidth={10}
-                // Oletusikkuna
-                // startIndex={10}
-                // endIndex={40}
               />
             </AreaChart>
           </ResponsiveContainer>

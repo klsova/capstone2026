@@ -9,10 +9,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
+  // Area,
 } from 'recharts';
 import { Box, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import dayjs from 'dayjs';
+// import dayjs from 'dayjs';
 
 interface CumulativeChartProps {
   startDate: string;
@@ -34,7 +34,8 @@ const weeklyData = [
   { time: 'Week 3', cumulative: 2200, limit: 2250 },
 ];
 
-const CumulativeChart: React.FC<CumulativeChartProps> = () => {
+const CumulativeChart: React.FC<CumulativeChartProps> = ({ startDate, endDate }) => {
+  console.log(startDate, endDate);
   const [view, setView] = useState<'daily' | 'weekly'>('daily');
 
   const handleViewChange = (
@@ -49,10 +50,6 @@ const CumulativeChart: React.FC<CumulativeChartProps> = () => {
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-          Cumulative Sum
-        </Typography>
-
         <ToggleButtonGroup
           value={view}
           exclusive

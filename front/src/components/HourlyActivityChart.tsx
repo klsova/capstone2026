@@ -22,52 +22,46 @@ const data = [
 
 const HourlyActivityChart = () => {
   return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
-        Hourly activity
-      </Typography>
-
-      <Box sx={{ flex: 1, minHeight: 0 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-            <XAxis dataKey="hour" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis fontSize={11} tickLine={false} axisLine={false} />
-            <Tooltip
-              cursor={{ fill: 'rgba(0,0,0,0.03)' }}
-              contentStyle={{
-                borderRadius: '8ppx',
-                border: 'none',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              }}
-            />
-            <Legend
-              verticalAlign="top"
-              align="right"
-              iconType="circle"
-              wrapperStyle={{ paddingBottom: '20px', fontSize: '12px' }}
-            />
-            <Bar
-              dataKey="aurum"
-              name="Aurum"
-              fill="#1db954" // Vihreä
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="pc1"
-              name="PC1"
-              fill="#b2a100" // Vihreä
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="pc2"
-              name="PC2"
-              fill="#c26a00" // Vihreä
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+    <Box sx={{ width: '100%', height: '100%' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+          <XAxis dataKey="hour" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis fontSize={11} tickLine={false} axisLine={false} />
+          <Tooltip
+            cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+            contentStyle={{
+              borderRadius: '8ppx',
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            }}
+          />
+          <Legend
+            verticalAlign="top"
+            align="right"
+            iconType="circle"
+            wrapperStyle={{ paddingBottom: '20px', fontSize: '12px' }}
+          />
+          <Bar
+            dataKey="aurum"
+            name="Aurum"
+            fill="#1db954" // Vihreä
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            dataKey="pc1"
+            name="PC1"
+            fill="#b2a100" // Vihreä
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            dataKey="pc2"
+            name="PC2"
+            fill="#c26a00" // Vihreä
+            radius={[4, 4, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </Box>
   );
 };

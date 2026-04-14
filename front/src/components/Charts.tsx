@@ -2,6 +2,7 @@ import { Paper, Grid } from '@mui/material';
 import CumulativeChart from './CumulativeChart';
 import PeakDetectionChart from './PeakDetectionChart';
 import HourlyActivityChart from './HourlyActivityChart';
+import ChartCard from './ChartCard';
 
 interface ChartsProps {
   facility: string;
@@ -16,52 +17,27 @@ const Charts: React.FC<ChartsProps> = ({ facility, startDate, endDate }) => {
     <Grid container spacing={3}>
       {/*Tuntikaavio*/}
       <Grid size={6}>
-        <Paper
-          sx={{
-            p: 3,
-            height: 350,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'text.secondary',
-            boxSizing: 'border-box',
-          }}
-        >
+        <ChartCard title="Hourly Activity" height={350}>
           <HourlyActivityChart />
-        </Paper>
+        </ChartCard>
       </Grid>
+
       {/*Kumulaatiokaavio*/}
       <Grid size={6}>
-        <Paper
-          sx={{
-            p: 3,
-            height: 350,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            color: 'text.secondary',
-            boxSizing: 'border-box',
-          }}
-        >
+        <ChartCard title="Cumulative Sum" height={350}>
           <CumulativeChart startDate={startDate} endDate={endDate} />
-        </Paper>
+        </ChartCard>
       </Grid>
 
       {/*Piikkikaavio*/}
       <Grid size={12}>
-        <Paper
-          sx={{
-            p: 3,
-            height: 400,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'text.secondary',
-          }}
-        >
-          <PeakDetectionChart startDate={startDate} endDate={endDate} />
-        </Paper>
+        <ChartCard title={`Peak Detection: ${facility}`} height={400}>
+          <PeakDetectionChart
+            facility={facility}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </ChartCard>
       </Grid>
     </Grid>
   );
