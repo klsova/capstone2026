@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   BarChart,
   Bar,
@@ -9,7 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 // Mielivaltaista testidataa
 const data = [

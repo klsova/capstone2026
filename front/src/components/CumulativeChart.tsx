@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ComposedChart,
   Line,
@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   // Area,
 } from 'recharts';
-import { Box, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 // import dayjs from 'dayjs';
 
 interface CumulativeChartProps {

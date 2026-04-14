@@ -80,6 +80,7 @@ const ChartCard: React.FC<ChartCardProps> = ({ title, height, children }) => {
             alignItems: 'center',
             bgcolor: '#f5f5f5',
           }}
+          component={'div'}
         >
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
             {title} - Detailed View

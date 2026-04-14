@@ -1,4 +1,4 @@
-import { Paper, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import CumulativeChart from './CumulativeChart';
 import PeakDetectionChart from './PeakDetectionChart';
 import HourlyActivityChart from './HourlyActivityChart';
