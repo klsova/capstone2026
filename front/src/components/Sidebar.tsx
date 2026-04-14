@@ -9,11 +9,32 @@ import {
   Divider,
 } from '@mui/material';
 
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
   const drawerWidth: number = 260;
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentState = location.state || {};
+  const currentFacility = currentState.facility;
+
+  // ID used for correct file name fetch before backend integration
+  const facilities = [
+    { id: 'Aurum', name: 'Aurum' },
+    { id: 'PET_Downstairs', name: 'PET Centre Downstairs' },
+    { id: 'PET_Upstairs', name: 'PET Centre Upstairs' },
+  ];
+
+  const handleFacilityChange = (facilityId: string) => {
+    navigate('/dashboard', {
+      state: {
+        ...currentState,
+        facility: facilityId,
+      },
+    });
+  };
+
   const menuItems = [
     { text: 'Dashboard', path: '/dashboard' },
     { text: 'Reports', path: '/reports' },
@@ -83,12 +104,36 @@ const Sidebar = () => {
         <Typography variant="overline" sx={{ px: 2, mt: 4, color: 'gray' }}>
           Facilities
         </Typography>
-        <List>
+        {/*<List>
           {['Aurum', 'PET Centre Downstairs', 'PET Centre Upstairs'].map((text) => (
             <ListItem key={text}>
               <ListItemText primary={`• ${text}`} sx={{ color: 'lightgray' }} />
             </ListItem>
           ))}
+        </List> */}
+
+        <List>
+          {facilities.map((fac) => {
+            const isActive = currentFacility === fac.id;
+            return (
+              <ListItem key={fac.id} disablePadding>
+                <ListItemButton
+                  onClick={() => handleFacilityChange(fac.id)}
+                  sx={{
+                    // Highlighting active selection
+                    bgcolor: isActive ? 'rgba(214, 242, 255, 0.1)' : 'transparent',
+                    borderRadius: 1,
+                    mb: 0.5,
+                  }}
+                >
+                  <ListItemText
+                    primary={`• ${fac.name}`}
+                    sx={{ color: isActive ? '#60c9f8' : 'lightgray' }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
 
         {/* Terminaali-placeholder*/}
