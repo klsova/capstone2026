@@ -8,8 +8,19 @@ import {
   Brush,
   AreaChart,
   Area,
+  ReferenceArea,
 } from 'recharts';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+} from '@mui/material';
 import dayjs from 'dayjs';
 
 interface PeakDetectionChartProps {
@@ -23,52 +34,59 @@ interface DataPoint {
   counts: number;
 }
 
-// Mielivaltaista testidataa
-/* const generateData = () => {
-  const data = [];
-  for (let i = 0; i < 53; i++) {
-    data.push({
-      time: i,
-      //Satunnaisia piikkejä
-      value: Math.floor(Math.random() * 400) + (i % 10 === 0 ? 300 : 0),
-    });
-  }
-  return data;
-}; */
+// Demoa varten tehty päästöpiikkiolio
+interface EmissionPeak {
+  id: string;
+  startTime: string;
+  endTime: string;
+  severity: string;
+}
 
-// const data = generateData();
+// 1. MOCK DATA DEMOA VARTEN (4.4.2025 - 5.5.2025)
+const MOCK_PEAKS: EmissionPeak[] = [
+  {
+    id: 'DEMO-PEAK-001',
+    startTime: '2025-04-10T12:35:00.000',
+    endTime: '2025-04-10T14:00:00.000',
+    severity: 'High',
+  },
+  {
+    id: 'DEMO-PEAK-002',
+    startTime: '2025-04-11T08:15:00.000',
+    endTime: '2025-04-11T08:50:00.000',
+    severity: 'Medium',
+  },
+];
 
 const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   facility,
   startDate,
   endDate,
 }) => {
-  console.log(startDate, endDate);
-
   const [rawData, setRawData] = useState<DataPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch demo JSON data from file, to be replaced with fetching from backend:
+  // tila modalille
+  const [selectedPeak, setSelectedPeak] = useState<EmissionPeak | null>(null);
+
+  // Fetch demo JSON data from file
   useEffect(() => {
     setLoading(true);
     setError(null);
 
-    // temp file fetching logic before backend integration
     const fileName = `/${facility}_resample.json`;
-    console.log(`Haetaan tiedostoa: ${fileName}`);
 
     fetch(fileName)
       .then((res) => {
-        if (!res.ok) throw new Error(`File ${fileName} not found in the -public- folder`);
+        if (!res.ok) throw new Error(`File not found: ${fileName}`);
         return res.json();
       })
-      .then((data) => {
+      .then((data: DataPoint[]) => {
         setRawData(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Loading data failed:', err);
         setError(err.message);
         setLoading(false);
       });
@@ -81,26 +99,34 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
     const start = dayjs(startDate).startOf('day');
     const end = dayjs(endDate).endOf('day');
 
-    return (
-      rawData
-        .filter((point) => {
-          const pointDate = dayjs(point.timestamp);
-          return (
-            (pointDate.isAfter(start) || pointDate.isSame(start)) &&
-            (pointDate.isBefore(end) || pointDate.isSame(end))
-          );
-        })
-        //Formatting into more readable date/time
-        .map((point) => ({
-          ...point,
-          displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm'),
-          counts: Math.round(point.counts * 100) / 100,
-        }))
-    );
+    return rawData
+      .filter((point) => {
+        const pointDate = dayjs(point.timestamp);
+        return (
+          (pointDate.isAfter(start) || pointDate.isSame(start)) &&
+          (pointDate.isBefore(end) || pointDate.isSame(end))
+        );
+      })
+      .map((point) => ({
+        ...point,
+        displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm'),
+        counts: Math.round(point.counts * 100) / 100,
+      }));
   }, [rawData, startDate, endDate]);
 
+  // DEMOPIIKKIEN FORMATOINTIA X-AKSELIA VARTEN
+  const formattedPeaks = useMemo(() => {
+    return MOCK_PEAKS.map((peak) => ({
+      ...peak,
+      displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm'),
+      displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm'),
+    }));
+  }, []);
+
+  const handlePeakClick = (peak: EmissionPeak) => setSelectedPeak(peak);
+  const handleCloseModal = () => setSelectedPeak(null);
+
   if (loading) {
-    // reformat to universal spinner?
     return (
       <Box
         sx={{
@@ -126,13 +152,6 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-        Peak Detection: {facility}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
-        1.1.2025 - 1.1.2026 --demo--
-      </Typography>
-*/}
       {filteredData.length === 0 ? (
         <Box
           sx={{
@@ -169,7 +188,23 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                 fill="#e8f5e9"
                 strokeWidth={2}
                 name="Counts"
+                isAnimationActive={false}
               />
+
+              {/* DEMO PEAKS ADDED TO CHART */}
+              {formattedPeaks.map((peak, index) => (
+                <ReferenceArea
+                  key={index}
+                  x1={peak.displayStart}
+                  x2={peak.displayEnd}
+                  fill={peak.severity === 'High' ? '#f44336' : '#ff9800'}
+                  fillOpacity={0.2}
+                  stroke={peak.severity === 'High' ? '#f44336' : '#ff9800'}
+                  strokeOpacity={0.6}
+                  cursor="pointer"
+                  onClick={() => handlePeakClick(peak)}
+                />
+              ))}
 
               <Brush
                 dataKey="displayTime"
@@ -182,6 +217,51 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
           </ResponsiveContainer>
         </Box>
       )}
+
+      {/* Demomodaali piikkien muokkaamiseen */}
+      <Dialog
+        open={Boolean(selectedPeak)}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: '#f5f5f5' }}>
+          Edit peak id: {selectedPeak?.id}
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
+          <Typography variant="body1">
+            Peak type:{' '}
+            <Box
+              component="span"
+              sx={{
+                color: selectedPeak?.severity === 'High' ? 'error.main' : 'warning.main',
+                fontWeight: 'bold',
+              }}
+            >
+              {selectedPeak?.severity}
+            </Box>
+          </Typography>
+
+          <TextField
+            label="Start time"
+            defaultValue={dayjs(selectedPeak?.startTime).format('DD.MM.YYYY HH:mm')}
+            InputProps={{ readOnly: true }}
+          />
+          <TextField
+            label="End time"
+            defaultValue={dayjs(selectedPeak?.endTime).format('DD.MM.YYYY HH:mm')}
+            InputProps={{ readOnly: true }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, bgcolor: '#fafafa' }}>
+          <Button onClick={handleCloseModal} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleCloseModal} variant="contained" color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
