@@ -52,16 +52,27 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   // Fetch demo JSON data from file, to be replaced with fetching from backend:
   useEffect(() => {
     setLoading(true);
-    fetch('/demo_resample.json')
+    setError(null);
+
+    // temp file fetching logic before backend integration
+    const fileName = `/${facility}_resample.json`;
+    console.log(`Haetaan tiedostoa: ${fileName}`);
+
+    fetch(fileName)
       .then((res) => {
-        if (!res.ok) throw new Error('File not found');
+        if (!res.ok) throw new Error(`File ${fileName} not found in the -public- folder`);
         return res.json();
       })
       .then((data) => {
         setRawData(data);
         setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Loading data failed:', err);
+        setError(err.message);
+        setLoading(false);
       });
-  }, []);
+  }, [facility]);
 
   // Filter by user given timespan
   const filteredData = useMemo(() => {
