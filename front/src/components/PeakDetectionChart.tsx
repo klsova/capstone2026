@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { fetchEmissionData } from '../services/emissionService';
 import {
   XAxis,
   YAxis,
@@ -67,15 +68,36 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // tila modalille
+  const [detectedPeaks, setDetectedPeaks] = useState<EmissionPeak[]>([]);
   const [selectedPeak, setSelectedPeak] = useState<EmissionPeak | null>(null);
 
-  // Fetch demo JSON data from file
   useEffect(() => {
     setLoading(true);
     setError(null);
 
-    const fileName = `/${facility}_resample.json`;
+    fetchEmissionData(facility, startDate, endDate)
+      .then((data) => {
+        if (!data.emissions || data.emissions.length === 0) {
+          setRawData([]);
+        } else {
+          setRawData(data.emissions);
+        }
+
+        if (!data.peaks || data.peaks.length === 0) {
+          setDetectedPeaks([]);
+        } else {
+          setDetectedPeaks(data.peaks);
+        }
+      })
+      .catch(() => {
+        setError('Data fetching from server failed. Try again later.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [facility, startDate, endDate]);
+
+  /*    const fileName = `/${facility}_resample.json`;
 
     fetch(fileName)
       .then((res) => {
@@ -90,9 +112,11 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
         setError(err.message);
         setLoading(false);
       });
-  }, [facility]);
+  }, [facility]); 
 
-  // Filter by user given timespan
+
+*/
+
   const filteredData = useMemo(() => {
     if (rawData.length === 0) return [];
 
@@ -116,12 +140,17 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
   // DEMOPIIKKIEN FORMATOINTIA X-AKSELIA VARTEN
   const formattedPeaks = useMemo(() => {
-    return MOCK_PEAKS.map((peak) => ({
+    return detectedPeaks.map((peak) => ({
       ...peak,
       displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm'),
       displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm'),
     }));
-  }, []);
+    /*     return MOCK_PEAKS.map((peak) => ({
+      ...peak,
+      displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm'),
+      displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm'),
+    })); */
+  }, [detectedPeaks]);
 
   const handlePeakClick = (peak: EmissionPeak) => setSelectedPeak(peak);
   const handleCloseModal = () => setSelectedPeak(null);
