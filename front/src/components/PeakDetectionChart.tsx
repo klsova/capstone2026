@@ -133,7 +133,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
       })
       .map((point) => ({
         ...point,
-        displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm'),
+        displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm:ss'),
         counts: Math.round(point.counts * 100) / 100,
       }));
   }, [rawData, startDate, endDate]);
@@ -142,14 +142,9 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   const formattedPeaks = useMemo(() => {
     return detectedPeaks.map((peak) => ({
       ...peak,
-      displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm'),
-      displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm'),
+      displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm:ss'),
+      displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm:ss'),
     }));
-    /*     return MOCK_PEAKS.map((peak) => ({
-      ...peak,
-      displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm'),
-      displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm'),
-    })); */
   }, [detectedPeaks]);
 
   const handlePeakClick = (peak: EmissionPeak) => setSelectedPeak(peak);
@@ -273,12 +268,12 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
           <TextField
             label="Start time"
-            defaultValue={dayjs(selectedPeak?.startTime).format('DD.MM.YYYY HH:mm')}
+            defaultValue={dayjs(selectedPeak?.startTime).format('DD.MM.YYYY HH:mm:ss')}
             InputProps={{ readOnly: true }}
           />
           <TextField
             label="End time"
-            defaultValue={dayjs(selectedPeak?.endTime).format('DD.MM.YYYY HH:mm')}
+            defaultValue={dayjs(selectedPeak?.endTime).format('DD.MM.YYYY HH:mm:ss')}
             InputProps={{ readOnly: true }}
           />
         </DialogContent>
