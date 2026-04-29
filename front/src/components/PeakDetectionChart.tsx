@@ -10,6 +10,7 @@ import {
   AreaChart,
   Area,
   ReferenceArea,
+  Line,
 } from 'recharts';
 import {
   Box,
@@ -204,7 +205,18 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
               />
               <YAxis fontSize={10} tick={{ fill: '#666' }} />
               <Tooltip />
+              {/* Threshold */}
+              <Line
+                type="monotone"
+                dataKey="threshold"
+                stroke="#ff4d4d"
+                strokeDasharray="5 5"
+                dot={false}
+                name="Threshold"
+                isAnimationActive={false}
+              />
 
+              {/* Emission counts*/}
               <Area
                 type="monotone"
                 dataKey="counts"
