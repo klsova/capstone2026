@@ -233,9 +233,9 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                   key={index}
                   x1={peak.displayStart}
                   x2={peak.displayEnd}
-                  fill={peak.severity === 'High' ? '#f44336' : '#ff9800'}
+                  fill="#f44336"
                   fillOpacity={0.2}
-                  stroke={peak.severity === 'High' ? '#f44336' : '#ff9800'}
+                  stroke="#f44336"
                   strokeOpacity={0.6}
                   cursor="pointer"
                   onClick={() => handlePeakClick(peak)}
@@ -264,29 +264,25 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
         <DialogTitle sx={{ bgcolor: '#f5f5f5' }}>
           Edit peak id: {selectedPeak?.id}
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
-          <Typography variant="body1">
-            Peak type:{' '}
-            <Box
-              component="span"
-              sx={{
-                color: selectedPeak?.severity === 'High' ? 'error.main' : 'warning.main',
-                fontWeight: 'bold',
-              }}
-            >
-              {selectedPeak?.severity}
-            </Box>
-          </Typography>
-
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
           <TextField
             label="Start time"
             defaultValue={dayjs(selectedPeak?.startTime).format('DD.MM.YYYY HH:mm:ss')}
             InputProps={{ readOnly: true }}
+            sx={{ mt: 1 }}
           />
           <TextField
             label="End time"
             defaultValue={dayjs(selectedPeak?.endTime).format('DD.MM.YYYY HH:mm:ss')}
             InputProps={{ readOnly: true }}
+          />
+
+          <TextField
+            label="Notes"
+            placeholder="Additional notes or comments..."
+            multiline
+            rows={4}
+            fullWidth
           />
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: '#fafafa' }}>
