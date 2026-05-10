@@ -14,9 +14,18 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate } from 'react-router-dom';
 import dayjs, { Dayjs } from 'dayjs';
+import { useData } from '../context/DataContext';
 
 const FacilitySelection = () => {
   const navigate = useNavigate();
+
+  const {
+    setFacility: setGlobalFacility,
+    setStartDate: setGlobalStart,
+    setEndDate: setGlobalEnd,
+    setEmissionsData,
+    setPeaksData,
+  } = useData();
 
   const [facility, setFacility] = useState('');
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs('2025-07-18'));
@@ -24,13 +33,14 @@ const FacilitySelection = () => {
 
   const handleStart = () => {
     if (facility && startDate && endDate) {
-      navigate('/dashboard', {
-        state: {
-          facility,
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
-        },
-      });
+      setGlobalFacility(facility);
+      setGlobalStart(startDate.toISOString());
+      setGlobalEnd(endDate.toISOString());
+
+      setEmissionsData([]);
+      setPeaksData([]);
+
+      navigate('/dashboard');
     } else {
       alert('Choose a facility and time frame');
     }

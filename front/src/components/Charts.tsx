@@ -8,9 +8,17 @@ interface ChartsProps {
   facility: string;
   startDate: string;
   endDate: string;
+  emissionsData: any[];
+  peaksData: any[];
 }
 
-const Charts: React.FC<ChartsProps> = ({ facility, startDate, endDate }) => {
+const Charts: React.FC<ChartsProps> = ({
+  facility,
+  startDate,
+  endDate,
+  emissionsData,
+  peaksData,
+}) => {
   console.log(facility, startDate, endDate);
 
   return (
@@ -36,6 +44,8 @@ const Charts: React.FC<ChartsProps> = ({ facility, startDate, endDate }) => {
             facility={facility}
             startDate={startDate}
             endDate={endDate}
+            emissionsData={emissionsData}
+            peaksData={peaksData}
           />
         </ChartCard>
       </Grid>

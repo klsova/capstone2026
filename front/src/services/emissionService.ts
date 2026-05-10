@@ -10,8 +10,12 @@ const facilityMap: Record<string, string> = {
 };
 
 const stripTimezone = (dateStr: string) => {
-  const isoString = new Date(dateStr).toISOString();
-  return isoString.substring(0, 19).replace('T', ' ');
+  if (!dateStr || dateStr === "Invalid Date") return "";
+
+  const dateObj = new Date(dateStr);
+  if (isNaN(dateObj.getTime())) return "";
+
+  return dateObj.toISOString().substring(0, 19).replace('T', ' ');
 };
 
 export const fetchEmissionData = async (facility: string, startDate: string, endDate: string) => {

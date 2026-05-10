@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
-import { fetchEmissionData } from '../services/emissionService';
+import { useState, useMemo } from 'react';
 import {
   XAxis,
   YAxis,
@@ -29,6 +28,8 @@ interface PeakDetectionChartProps {
   facility: string;
   startDate: string;
   endDate: string;
+  emissionsData: any[];
+  peaksData: any[];
 }
 
 interface DataPoint {
@@ -36,7 +37,6 @@ interface DataPoint {
   counts: number;
 }
 
-// Demoa varten tehty päästöpiikkiolio
 interface EmissionPeak {
   id: string;
   startTime: string;
@@ -44,35 +44,21 @@ interface EmissionPeak {
   severity: string;
 }
 
-// 1. MOCK DATA DEMOA VARTEN (4.4.2025 - 5.5.2025)
-const MOCK_PEAKS: EmissionPeak[] = [
-  {
-    id: 'DEMO-PEAK-001',
-    startTime: '2025-04-10T12:35:00.000',
-    endTime: '2025-04-10T14:00:00.000',
-    severity: 'High',
-  },
-  {
-    id: 'DEMO-PEAK-002',
-    startTime: '2025-04-11T08:15:00.000',
-    endTime: '2025-04-11T08:50:00.000',
-    severity: 'Medium',
-  },
-];
-
 const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   facility,
   startDate,
   endDate,
+  emissionsData,
+  peaksData,
 }) => {
-  const [rawData, setRawData] = useState<DataPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  //  const [rawData, setRawData] = useState<DataPoint[]>([]);
+  //  const [loading, setLoading] = useState(true);
+  //  const [error, setError] = useState<string | null>(null);
 
-  const [detectedPeaks, setDetectedPeaks] = useState<EmissionPeak[]>([]);
+  //  const [detectedPeaks, setDetectedPeaks] = useState<EmissionPeak[]>([]);
   const [selectedPeak, setSelectedPeak] = useState<EmissionPeak | null>(null);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     setLoading(true);
     setError(null);
 
@@ -96,29 +82,9 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [facility, startDate, endDate]);
+  }, [facility, startDate, endDate]); */
 
-  /*    const fileName = `/${facility}_resample.json`;
-
-    fetch(fileName)
-      .then((res) => {
-        if (!res.ok) throw new Error(`File not found: ${fileName}`);
-        return res.json();
-      })
-      .then((data: DataPoint[]) => {
-        setRawData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [facility]); 
-
-
-*/
-
-  const filteredData = useMemo(() => {
+  /*   const filteredData = useMemo(() => {
     if (rawData.length === 0) return [];
 
     const start = dayjs(startDate).startOf('day');
@@ -137,21 +103,31 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
         displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm:ss'),
         counts: Math.round(point.counts * 100) / 100,
       }));
-  }, [rawData, startDate, endDate]);
+  }, [rawData, startDate, endDate]); */
 
-  // DEMOPIIKKIEN FORMATOINTIA X-AKSELIA VARTEN
+  const filteredData = useMemo(() => {
+    if (!emissionsData || emissionsData.length === 0) return [];
+
+    return emissionsData.map((point) => ({
+      ...point,
+      displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm:ss'),
+      counts: Math.round(point.counts * 100) / 100,
+    }));
+  }, [emissionsData]);
+
   const formattedPeaks = useMemo(() => {
-    return detectedPeaks.map((peak) => ({
+    if (!peaksData) return [];
+    return peaksData.map((peak) => ({
       ...peak,
       displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm:ss'),
       displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm:ss'),
     }));
-  }, [detectedPeaks]);
+  }, [peaksData]);
 
-  const handlePeakClick = (peak: EmissionPeak) => setSelectedPeak(peak);
+  const handlePeakClick = (peak: any) => setSelectedPeak(peak);
   const handleCloseModal = () => setSelectedPeak(null);
 
-  if (loading) {
+  /*   if (loading) {
     return (
       <Box
         sx={{
@@ -173,7 +149,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
         <Typography color="error">Error trying to load data: {error}</Typography>
       </Box>
     );
-  }
+  } */
 
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>

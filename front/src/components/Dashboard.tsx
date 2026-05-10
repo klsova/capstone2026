@@ -1,16 +1,53 @@
-import { useLocation } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { useState, useEffect } from 'react';
 import Charts from './Charts';
 import dayjs from 'dayjs';
+import { fetchEmissionData } from '../services/emissionService';
+import { exportToExcel } from '../utils/exportUtils';
+import { useData } from '../context/DataContext';
 
 const Dashboard = () => {
-  const location = useLocation();
+  const {
+    facility,
+    startDate,
+    endDate,
+    emissionsData,
+    setEmissionsData,
+    peaksData,
+    setPeaksData,
+  } = useData();
 
-  // Käyttäjän aloitusruudussa valitsema laitos + aikaikkuna
-  const { facility, start, end } = location.state || {
-    facility: 'Not Selected',
-    start: dayjs().subtract(7, 'day').toISOString(),
-    end: dayjs().toISOString,
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (emissionsData.length > 0) return;
+    if (facility === 'Not Selected' || !startDate || !endDate) return;
+
+    setLoading(true);
+    setError(null);
+
+    fetchEmissionData(facility, startDate, endDate)
+      .then((data) => {
+        setEmissionsData(data.emissions || []);
+        setPeaksData(data.peaks || []);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError('Data fetching from server failed.');
+      })
+      .finally(() => setLoading(false));
+  }, [
+    facility,
+    startDate,
+    endDate,
+    emissionsData.length,
+    setEmissionsData,
+    setPeaksData,
+  ]);
+
+  const handleExport = () => {
+    exportToExcel(peaksData, facility);
   };
 
   return (
@@ -31,19 +68,33 @@ const Dashboard = () => {
             variant="caption"
             sx={{ color: 'text.secondary', fontFamily: 'monospace' }}
           >
-            Time range: {dayjs(start).format('DD.MM.YYYY')} -{' '}
-            {dayjs(end).format('DD.MM.YYYY')}
+            Time range: {dayjs(startDate).format('DD.MM.YYYY')} -{' '}
+            {dayjs(endDate).format('DD.MM.YYYY')}
           </Typography>
         </Box>
         <Button
           variant="contained"
+          onClick={handleExport}
+          disabled={peaksData.length === 0 || loading}
           sx={{ bgcolor: '#60c9f8', '&:hover': { bgcolor: '#4fb8e7' }, px: 4, py: 1 }}
         >
           Export
         </Button>
       </Box>
 
-      <Charts facility={facility} startDate={start} endDate={end} />
+      {loading ? (
+        <CircularProgress />
+      ) : error ? (
+        <Typography color="error">{error}</Typography>
+      ) : (
+        <Charts
+          facility={facility}
+          startDate={startDate}
+          endDate={endDate}
+          emissionsData={emissionsData}
+          peaksData={peaksData}
+        />
+      )}
     </Box>
   );
 };

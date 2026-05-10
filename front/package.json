@@ -17,6 +17,7 @@
     "@mui/x-date-pickers": "^8.27.2",
     "axios": "^1.15.1",
     "dayjs": "^1.11.20",
+    "exceljs": "^4.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
