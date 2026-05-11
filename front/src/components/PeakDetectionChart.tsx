@@ -154,9 +154,9 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
             </IconButton>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 'bold', minWidth: 150, textAlign: 'center' }}
+              sx={{ fontWeight: 'bold', minWidth: 250, textAlign: 'center' }}
             >
-              {currentDate.format('DD.MM.YYYY')}
+              {currentDate.format('dddd, DD.MM.YYYY')}
             </Typography>
 
             <IconButton onClick={handleNextDay} disabled={isAtEnd} color="primary">
@@ -219,7 +219,6 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                 isAnimationActive={false}
               />
 
-              {/* DEMO PEAKS ADDED TO CHART */}
               {formattedPeaks.map((peak, index) => (
                 <ReferenceArea
                   key={index}
