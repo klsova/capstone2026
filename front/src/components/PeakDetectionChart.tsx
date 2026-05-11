@@ -69,6 +69,8 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   const [currentDate, setCurrentDate] = useState(dayjs(startDate).startOf('day'));
   const [isDailyView, setIsDailyView] = useState(true);
 
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+
   // Modal states
   const [tempStartTime, setTempStartTime] = useState<dayjs.Dayjs | null>(null);
   const [tempEndTime, setTempEndTime] = useState<dayjs.Dayjs | null>(null);
@@ -149,6 +151,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   }, [peaksData, currentDate, isDailyView, timeFormat]);
 
   const handlePeakClick = (peak: any) => setSelectedPeak(peak);
+
   const handleCloseModal = () => setSelectedPeak(null);
 
   const handleSave = () => {
@@ -252,7 +255,9 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                 tick={{ fill: '#666' }}
               />
               <YAxis fontSize={10} tick={{ fill: '#666' }} />
-              <Tooltip />
+              <Tooltip
+                labelFormatter={(unixTime) => dayjs(unixTime).format(timeFormat)}
+              />
               {/* Threshold */}
               <Line
                 type="monotone"
