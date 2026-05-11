@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   XAxis,
   YAxis,
@@ -14,15 +14,22 @@ import {
 import {
   Box,
   Typography,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   TextField,
+  IconButton,
 } from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 interface PeakDetectionChartProps {
   facility: string;
@@ -51,108 +58,117 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   emissionsData,
   peaksData,
 }) => {
-  //  const [rawData, setRawData] = useState<DataPoint[]>([]);
-  //  const [loading, setLoading] = useState(true);
-  //  const [error, setError] = useState<string | null>(null);
-
-  //  const [detectedPeaks, setDetectedPeaks] = useState<EmissionPeak[]>([]);
   const [selectedPeak, setSelectedPeak] = useState<EmissionPeak | null>(null);
+  const [currentDate, setCurrentDate] = useState(dayjs(startDate).startOf('day'));
+  const [isDailyView, setIsDailyView] = useState(true);
 
-  /*   useEffect(() => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    setCurrentDate(dayjs(startDate).startOf('day'));
+  }, [startDate]);
 
-    fetchEmissionData(facility, startDate, endDate)
-      .then((data) => {
-        if (!data.emissions || data.emissions.length === 0) {
-          setRawData([]);
-        } else {
-          setRawData(data.emissions);
-        }
+  const handlePrevDay = () => setCurrentDate((prev) => prev.subtract(1, 'day'));
+  const handleNextDay = () => setCurrentDate((prev) => prev.add(1, 'day'));
 
-        if (!data.peaks || data.peaks.length === 0) {
-          setDetectedPeaks([]);
-        } else {
-          setDetectedPeaks(data.peaks);
-        }
-      })
-      .catch(() => {
-        setError('Data fetching from server failed. Try again later.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [facility, startDate, endDate]); */
+  //block trying to go over the fetched data dates
+  const isAtStart = currentDate.isSameOrBefore(dayjs(startDate).startOf('day'));
+  const isAtEnd = currentDate.isSameOrAfter(dayjs(endDate).startOf('day'));
 
-  /*   const filteredData = useMemo(() => {
-    if (rawData.length === 0) return [];
-
-    const start = dayjs(startDate).startOf('day');
-    const end = dayjs(endDate).endOf('day');
-
-    return rawData
-      .filter((point) => {
-        const pointDate = dayjs(point.timestamp);
-        return (
-          (pointDate.isAfter(start) || pointDate.isSame(start)) &&
-          (pointDate.isBefore(end) || pointDate.isSame(end))
-        );
-      })
-      .map((point) => ({
-        ...point,
-        displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm:ss'),
-        counts: Math.round(point.counts * 100) / 100,
-      }));
-  }, [rawData, startDate, endDate]); */
+  const timeFormat = isDailyView ? 'HH:mm:ss' : 'DD.MM. HH:mm:ss';
 
   const filteredData = useMemo(() => {
     if (!emissionsData || emissionsData.length === 0) return [];
 
-    return emissionsData.map((point) => ({
+    let dataToShow = emissionsData;
+
+    if (isDailyView) {
+      const startOfDay = currentDate.startOf('day');
+      const endOfDay = currentDate.endOf('day');
+
+      dataToShow = emissionsData.filter((point) => {
+        const pointDate = dayjs(point.timestamp);
+        return (
+          (pointDate.isAfter(startOfDay) || pointDate.isSame(startOfDay)) &&
+          (pointDate.isBefore(endOfDay) || pointDate.isSame(endOfDay))
+        );
+      });
+    }
+
+    return dataToShow.map((point) => ({
       ...point,
-      displayTime: dayjs(point.timestamp).format('DD.MM. HH:mm:ss'),
+      displayTime: dayjs(point.timestamp).format(timeFormat),
       counts: Math.round(point.counts * 100) / 100,
     }));
-  }, [emissionsData]);
+  }, [emissionsData, currentDate, isDailyView, timeFormat]);
 
   const formattedPeaks = useMemo(() => {
     if (!peaksData) return [];
-    return peaksData.map((peak) => ({
+
+    let peaksToShow = peaksData;
+
+    if (isDailyView) {
+      const startOfDay = currentDate.startOf('day');
+      const endOfDay = currentDate.endOf('day');
+
+      peaksToShow = peaksData.filter((peak) => {
+        const peakStart = dayjs(peak.startTime);
+        return (
+          (peakStart.isAfter(startOfDay) || peakStart.isSame(startOfDay)) &&
+          (peakStart.isBefore(endOfDay) || peakStart.isSame(endOfDay))
+        );
+      });
+    }
+
+    return peaksToShow.map((peak) => ({
       ...peak,
-      displayStart: dayjs(peak.startTime).format('DD.MM. HH:mm:ss'),
-      displayEnd: dayjs(peak.endTime).format('DD.MM. HH:mm:ss'),
+      displayStart: dayjs(peak.startTime).format(timeFormat),
+      displayEnd: dayjs(peak.endTime).format(timeFormat),
     }));
-  }, [peaksData]);
+  }, [peaksData, currentDate, isDailyView, timeFormat]);
 
   const handlePeakClick = (peak: any) => setSelectedPeak(peak);
   const handleCloseModal = () => setSelectedPeak(null);
 
-  /*   if (loading) {
-    return (
+  return (
+    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box
         sx={{
           display: 'flex',
-          height: 300,
+          justifyContent: 'space-between',
           alignItems: 'center',
-          justifyContent: 'center',
+          mb: 2,
+          px: 2,
         }}
       >
-        <CircularProgress size={24} sx={{ mr: 2 }} />
-        <Typography color="text.secondary">Loading data...</Typography>
-      </Box>
-    );
-  }
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => setIsDailyView(!isDailyView)}
+        >
+          {isDailyView ? 'Show Full View' : 'Show Daily View'}
+        </Button>
 
-  if (error) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography color="error">Error trying to load data: {error}</Typography>
-      </Box>
-    );
-  } */
+        {isDailyView && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton onClick={handlePrevDay} disabled={isAtStart} color="primary">
+              <ArrowBackIosNewIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 'bold', minWidth: 150, textAlign: 'center' }}
+            >
+              {currentDate.format('DD.MM.YYYY')}
+            </Typography>
 
-  return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <IconButton onClick={handleNextDay} disabled={isAtEnd} color="primary">
+              <ArrowForwardIosIcon />
+            </IconButton>
+          </Box>
+        )}
+
+        {/*Just a filler box to keep U more consistent between Daily/Whole view states*/}
+        <Box sx={{ width: 130 }} />
+      </Box>
+
       {filteredData.length === 0 ? (
         <Box
           sx={{

@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
