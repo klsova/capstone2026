@@ -27,6 +27,11 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { useData } from '../context/DataContext';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -48,7 +53,7 @@ interface EmissionPeak {
   id: string;
   startTime: string;
   endTime: string;
-  severity: string;
+  notes?: string;
 }
 
 const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
@@ -56,11 +61,26 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   startDate,
   endDate,
   emissionsData,
-  peaksData,
+  // peaksData,
 }) => {
+  const { peaksData, setPeaksData } = useData();
+
   const [selectedPeak, setSelectedPeak] = useState<EmissionPeak | null>(null);
   const [currentDate, setCurrentDate] = useState(dayjs(startDate).startOf('day'));
   const [isDailyView, setIsDailyView] = useState(true);
+
+  // Modal states
+  const [tempStartTime, setTempStartTime] = useState<dayjs.Dayjs | null>(null);
+  const [tempEndTime, setTempEndTime] = useState<dayjs.Dayjs | null>(null);
+  const [tempNotes, setTempNotes] = useState('');
+
+  useEffect(() => {
+    if (selectedPeak) {
+      setTempStartTime(dayjs(selectedPeak.startTime));
+      setTempEndTime(dayjs(selectedPeak.endTime));
+      setTempNotes(selectedPeak.notes || '');
+    }
+  }, [selectedPeak]);
 
   useEffect(() => {
     setCurrentDate(dayjs(startDate).startOf('day'));
@@ -95,6 +115,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
     return dataToShow.map((point) => ({
       ...point,
+      timeMs: dayjs(point.timestamp).valueOf(),
       displayTime: dayjs(point.timestamp).format(timeFormat),
       counts: Math.round(point.counts * 100) / 100,
     }));
@@ -120,6 +141,8 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
     return peaksToShow.map((peak) => ({
       ...peak,
+      startMs: dayjs(peak.startTime).valueOf(),
+      endMs: dayjs(peak.endTime).valueOf(),
       displayStart: dayjs(peak.startTime).format(timeFormat),
       displayEnd: dayjs(peak.endTime).format(timeFormat),
     }));
@@ -127,6 +150,35 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
 
   const handlePeakClick = (peak: any) => setSelectedPeak(peak);
   const handleCloseModal = () => setSelectedPeak(null);
+
+  const handleSave = () => {
+    if (!selectedPeak || !tempStartTime || !tempEndTime) return;
+
+    const updatedPeaks = peaksData.map((p) => {
+      if (p.id === selectedPeak.id) {
+        return {
+          ...p,
+          startTime: tempStartTime.toISOString(),
+          endTime: tempEndTime.toISOString(),
+          notes: tempNotes,
+        };
+      }
+      return p;
+    });
+
+    setPeaksData(updatedPeaks);
+    handleCloseModal();
+  };
+
+  const handleDelete = () => {
+    if (!selectedPeak) return;
+
+    if (window.confirm('Are you sure you want to delete this peak?')) {
+      const filteredPeaks = peaksData.filter((p) => p.id !== selectedPeak.id);
+      setPeaksData(filteredPeaks);
+      handleCloseModal();
+    }
+  };
 
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -190,7 +242,11 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
             <AreaChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
-                dataKey="displayTime"
+                dataKey="timeMs"
+                type="number"
+                domain={['dataMin', 'dataMax']}
+                scale={'time'}
+                tickFormatter={(unixTime) => dayjs(unixTime).format(timeFormat)}
                 fontSize={10}
                 minTickGap={50}
                 tick={{ fill: '#666' }}
@@ -222,8 +278,8 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
               {formattedPeaks.map((peak, index) => (
                 <ReferenceArea
                   key={index}
-                  x1={peak.displayStart}
-                  x2={peak.displayEnd}
+                  x1={peak.startMs}
+                  x2={peak.endMs}
                   fill="#f44336"
                   fillOpacity={0.2}
                   stroke="#f44336"
@@ -234,10 +290,11 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
               ))}
 
               <Brush
-                dataKey="displayTime"
+                dataKey="timeMs"
+                tickFormatter={(unixTime) => dayjs(unixTime).format(timeFormat)}
                 height={30}
                 stroke="#60c9f8"
-                fill="fff"
+                fill="#fff"
                 travellerWidth={10}
               />
             </AreaChart>
@@ -245,44 +302,83 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
         </Box>
       )}
 
-      {/* Demomodaali piikkien muokkaamiseen */}
+      {/* Modal for editing peaks */}
       <Dialog
         open={Boolean(selectedPeak)}
         onClose={handleCloseModal}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ bgcolor: '#f5f5f5' }}>
+        <DialogTitle
+          sx={{
+            bgcolor: '#f5f5f5',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           Edit peak id: {selectedPeak?.id}
+          <IconButton onClick={handleDelete} color="error" title="Delete Peak">
+            <DeleteIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
-          <TextField
+
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 3 }}>
+          {/*           <TextField
             label="Start time"
             defaultValue={dayjs(selectedPeak?.startTime).format('DD.MM.YYYY HH:mm:ss')}
             InputProps={{ readOnly: true }}
             sx={{ mt: 1 }}
-          />
-          <TextField
+          /> */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="Start Time"
+              value={tempStartTime}
+              onChange={(newValue) => setTempStartTime(newValue)}
+              ampm={false}
+              format="DD.MM.YYYY HH:mm:ss"
+              views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
+            />
+
+            {/*           <TextField
             label="End time"
             defaultValue={dayjs(selectedPeak?.endTime).format('DD.MM.YYYY HH:mm:ss')}
             InputProps={{ readOnly: true }}
-          />
+          /> */}
 
+            <DateTimePicker
+              label="End Time"
+              value={tempEndTime}
+              onChange={(newValue) => setTempEndTime(newValue)}
+              ampm={false}
+              format="DD.MM.YYYY HH:mm:ss"
+              views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
+              //minDateTime={tempStartTime}
+            />
+          </LocalizationProvider>
           <TextField
             label="Notes"
             placeholder="Additional notes or comments..."
             multiline
             rows={4}
             fullWidth
+            value={tempNotes}
+            onChange={(e) => setTempNotes(e.target.value)}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2, bgcolor: '#fafafa' }}>
-          <Button onClick={handleCloseModal} color="inherit">
-            Cancel
+
+        <DialogActions sx={{ p: 2, bgcolor: '#fafafa', justifyContent: 'space-between' }}>
+          <Button onClick={handleDelete} color="error" variant="text">
+            Delete
           </Button>
-          <Button onClick={handleCloseModal} variant="contained" color="primary">
-            Save
-          </Button>
+          <Box>
+            <Button onClick={handleCloseModal} color="inherit" sx={{ mr: 1 }}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} variant="contained" color="primary">
+              Save Changes
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </Box>
