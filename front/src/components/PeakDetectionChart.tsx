@@ -29,7 +29,6 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useData } from '../context/DataContext';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
@@ -150,26 +149,89 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
     }));
   }, [peaksData, currentDate, isDailyView, timeFormat]);
 
-  const handlePeakClick = (peak: any) => setSelectedPeak(peak);
+  //const handlePeakClick = (peak: any) => setSelectedPeak(peak);
 
-  const handleCloseModal = () => setSelectedPeak(null);
+  const handleChartClick = (e: any) => {
+    //checks that click is hitting a data point within the chart
+    if (!e || !e.activeLabel) return;
+
+    const clickedMs = e.activeLabel;
+
+    const clickedExisting = peaksData.find((p) => {
+      const startMs = dayjs(p.startTime).valueOf();
+      const endMs = dayjs(p.endTime).valueOf();
+      return clickedMs >= startMs && clickedMs <= endMs;
+    });
+
+    if (clickedExisting) {
+      setIsCreatingNew(false);
+      setSelectedPeak(clickedExisting);
+    } else {
+      setIsCreatingNew(true);
+      setSelectedPeak({
+        id: `manual-${dayjs(clickedMs).format('DDMMHHmmss')}`,
+        startTime: dayjs(clickedMs).toISOString(),
+        endTime: dayjs(clickedMs).add(2, 'minute').toISOString(),
+        notes: '',
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPeak(null);
+    setIsCreatingNew(false);
+  };
 
   const handleSave = () => {
     if (!selectedPeak || !tempStartTime || !tempEndTime) return;
 
-    const updatedPeaks = peaksData.map((p) => {
-      if (p.id === selectedPeak.id) {
-        return {
-          ...p,
-          startTime: tempStartTime.toISOString(),
-          endTime: tempEndTime.toISOString(),
-          notes: tempNotes,
-        };
-      }
-      return p;
+    const newStartMs = tempStartTime.valueOf();
+    const newEndMs = tempEndTime.valueOf();
+
+    const overlappingPeaks = peaksData.filter((p) => {
+      if (!isCreatingNew && p.id === selectedPeak.id) return false;
+
+      const pStartMs = dayjs(p.startTime).valueOf();
+      const pEndMs = dayjs(p.endTime).valueOf();
+
+      return newStartMs < pEndMs && newEndMs > pStartMs;
     });
 
-    setPeaksData(updatedPeaks);
+    let peaksToKeep = peaksData;
+
+    if (overlappingPeaks.length > 0) {
+      const confirmMessage = `This peak overlaps with ${overlappingPeaks.length} existing peak(s).\n\nRemove the overlapping peaks with this one?`;
+
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+      const overlappingIds = overlappingPeaks.map((p) => p.id);
+      peaksToKeep = peaksData.filter((p) => !overlappingIds.includes(p.id));
+    }
+
+    if (isCreatingNew) {
+      const newPeak = {
+        id: selectedPeak.id,
+        startTime: tempStartTime.toISOString(),
+        endTime: tempEndTime.toISOString(),
+        notes: tempNotes,
+      };
+      setPeaksData([...peaksToKeep, newPeak]);
+    } else {
+      const updatedPeaks = peaksToKeep.map((p) => {
+        if (p.id === selectedPeak.id) {
+          return {
+            ...p,
+            startTime: tempStartTime.toISOString(),
+            endTime: tempEndTime.toISOString(),
+            notes: tempNotes,
+          };
+        }
+        return p;
+      });
+      setPeaksData(updatedPeaks);
+    }
+
     handleCloseModal();
   };
 
@@ -242,7 +304,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
       ) : (
         <Box sx={{ flex: 1, minHeight: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={filteredData}>
+            <AreaChart data={filteredData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="timeMs"
@@ -290,7 +352,6 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                   stroke="#f44336"
                   strokeOpacity={0.6}
                   cursor="pointer"
-                  onClick={() => handlePeakClick(peak)}
                 />
               ))}
 
@@ -322,10 +383,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
             alignItems: 'center',
           }}
         >
-          Edit peak id: {selectedPeak?.id}
-          <IconButton onClick={handleDelete} color="error" title="Delete Peak">
-            <DeleteIcon />
-          </IconButton>
+          {isCreatingNew ? 'Add New Peak' : `Edit peak id: ${selectedPeak?.id}`}
         </DialogTitle>
 
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 3 }}>
@@ -343,6 +401,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
               ampm={false}
               format="DD.MM.YYYY HH:mm:ss"
               views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
+              sx={{ mt: 1 }}
             />
 
             {/*           <TextField
@@ -373,15 +432,19 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
         </DialogContent>
 
         <DialogActions sx={{ p: 2, bgcolor: '#fafafa', justifyContent: 'space-between' }}>
-          <Button onClick={handleDelete} color="error" variant="text">
-            Delete
-          </Button>
+          <Box>
+            {!isCreatingNew && (
+              <Button onClick={handleDelete} color="error" variant="text">
+                Delete
+              </Button>
+            )}
+          </Box>
           <Box>
             <Button onClick={handleCloseModal} color="inherit" sx={{ mr: 1 }}>
               Cancel
             </Button>
             <Button onClick={handleSave} variant="contained" color="primary">
-              Save Changes
+              {isCreatingNew ? 'Add New Peak' : `Save changes`}
             </Button>
           </Box>
         </DialogActions>
