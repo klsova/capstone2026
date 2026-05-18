@@ -12,11 +12,14 @@ interface DataContextType {
   setEmissionsData: (data: any[]) => void;
   peaksData: any[];
   setPeaksData: (data: any[]) => void;
+  savedPeaks: any[];
+  setSavedPeaks: (data: any[]) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [savedPeaks, setSavedPeaks] = useState<any[]>([]);
   const [facility, setFacility] = useState('Not Selected');
   const [startDate, setStartDate] = useState(dayjs().subtract(7, 'day').toISOString());
   const [endDate, setEndDate] = useState(dayjs().toISOString());
@@ -36,6 +39,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setEmissionsData,
         peaksData,
         setPeaksData,
+        savedPeaks,
+        setSavedPeaks,
       }}
     >
       {children}

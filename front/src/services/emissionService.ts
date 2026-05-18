@@ -51,3 +51,26 @@ export const fetchEmissionData = async (facility: string, startDate: string, end
     throw error;
   }
 }
+
+export const savePeaksToBackend = async (facility: string, peaks: any[]) => {
+  try {
+    const response = await axios.post(`${API_URL}/save_peaks`, {
+      facility: facility,
+      peaks: peaks
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error trying to save emission data", error);
+    throw error;
+  }
+};
+
+export const fetchSavedPeaks = async (facility: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/saved_peaks/${facility}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error when trying to fetch saved peak data:", error);
+    return [];
+  }
+};

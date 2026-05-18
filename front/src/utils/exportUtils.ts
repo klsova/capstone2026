@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import dayjs from 'dayjs';
+import { Area } from 'recharts';
 
 //Only for demo test purposes in this stage to have a library and functionality
 //for exporting an excel file. This has no correlation to the actual report generated with
@@ -19,7 +20,8 @@ export const exportToExcel = async (detectedPeaks: any[], facility: string) => {
     { header: 'Start time', key: 'startTime', width: 20 },
     { header: 'End time', key: 'endTime', width: 20 },
     { header: 'Facility', key: 'facility', width: 20 },
-    { header: 'Comments', key: 'comments', width: 40}
+    { header: 'Comments', key: 'comments', width: 40 },
+    { header: 'Area-above-threshold', key: 'area', width: 15},
   ];
 
   worksheet.getRow(1).font = { bold: true };
@@ -33,7 +35,8 @@ export const exportToExcel = async (detectedPeaks: any[], facility: string) => {
       startTime: start.format('DD.MM.YYYY HH:mm:ss'),
       endTime: end.format('DD.MM.YYYY HH:mm:ss'),
       facility: facility,
-      comments: ''
+      comments: '',
+      area: peak.area
     })
   });
 

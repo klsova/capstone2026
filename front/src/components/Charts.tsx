@@ -1,8 +1,9 @@
 import { Grid } from '@mui/material';
 import CumulativeChart from './CumulativeChart';
 import PeakDetectionChart from './PeakDetectionChart';
-import HourlyActivityChart from './HourlyActivityChart';
+import WeeklyPeakEmissions from './WeeklyPeakEmissions';
 import ChartCard from './ChartCard';
+import { useData } from '../context/DataContext';
 
 interface ChartsProps {
   facility: string;
@@ -20,13 +21,12 @@ const Charts: React.FC<ChartsProps> = ({
   peaksData,
 }) => {
   console.log(facility, startDate, endDate);
-
+  const { savedPeaks } = useData();
   return (
     <Grid container spacing={3}>
-      {/*Tuntikaavio*/}
       <Grid size={6}>
-        <ChartCard title="Hourly Activity" height={350}>
-          <HourlyActivityChart />
+        <ChartCard title="Weekly Peak Emissions" height={350}>
+          <WeeklyPeakEmissions savedPeaks={savedPeaks} />
         </ChartCard>
       </Grid>
 
