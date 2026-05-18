@@ -138,15 +138,6 @@ const Dashboard = () => {
         </Box>
 
         <Button
-          variant="outlined"
-          onClick={handleSaveToBackend}
-          disabled={peaksData.length === 0 || loading}
-          sx={{ px: 4, py: 1 }}
-        >
-          Save Approved Peak data
-        </Button>
-
-        <Button
           variant="contained"
           onClick={handleExport}
           disabled={peaksData.length === 0 || loading}
@@ -161,13 +152,33 @@ const Dashboard = () => {
       ) : error ? (
         <Typography color="error">{error}</Typography>
       ) : (
-        <Charts
-          facility={facility}
-          startDate={startDate}
-          endDate={endDate}
-          emissionsData={emissionsData}
-          peaksData={peaksData}
-        />
+        <>
+          <Charts
+            facility={facility}
+            startDate={startDate}
+            endDate={endDate}
+            emissionsData={emissionsData}
+            peaksData={peaksData}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, mb: 4 }}>
+            <Button
+              variant="contained"
+              onClick={handleSaveToBackend}
+              disabled={peaksData.length === 0 || loading}
+              sx={{
+                bgcolor: '#60c9f8',
+                fontWeight: 'bold',
+                '&:hover': { bgcolor: '#4fb8e7' },
+                px: 5,
+                py: 1,
+                fontSize: '1rem',
+              }}
+            >
+              Save Approved Peak Data
+            </Button>
+          </Box>
+        </>
       )}
     </Box>
   );
