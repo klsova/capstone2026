@@ -18,17 +18,15 @@ const stripTimezone = (dateStr: string) => {
   return dateObj.toISOString().substring(0, 19).replace('T', ' ');
 };
 
-export const fetchEmissionData = async (facility: string, startDate: string, endDate: string) => {
+export const fetchEmissionData = async (facility: string, startDate: string, endDate: string, nSigma: number = 6) => {
   try {
-
-    // 
     const mappedFacility = facilityMap[facility];
 
     const formattedStart = stripTimezone(startDate);
     const formattedEnd = stripTimezone(endDate);
 
     const response = await axios.get(`${API_URL}/emissions`, {
-      params: { facility: mappedFacility, startDate: formattedStart, endDate: formattedEnd }
+      params: { facility: mappedFacility, startDate: formattedStart, endDate: formattedEnd, n_sigma: nSigma }
     });
 
     const responseData = response.data;

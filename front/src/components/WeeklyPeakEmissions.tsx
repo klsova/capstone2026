@@ -46,9 +46,9 @@ const WeeklyPeakEmissions: React.FC<WeeklyPeakEmissionsProps> = ({ savedPeaks })
 
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+      {/*       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
         Annual Emission Areas by Week
-      </Typography>
+      </Typography> */}
 
       <Box sx={{ flex: 1, minHeight: 0 }}>
         <ResponsiveContainer width="100%" height="100%">

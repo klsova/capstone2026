@@ -1,5 +1,16 @@
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  CircularProgress,
+  Slider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
 import { useState, useEffect } from 'react';
+import SettingsIcon from '@mui/icons-material/Settings';
 import Charts from './Charts';
 import dayjs from 'dayjs';
 import {
@@ -25,6 +36,9 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nSigma, setNSigma] = useState<number>(6);
+  const [isSigmaModalOpen, setSigmaModalOpen] = useState(false);
+  const [tempSigma, setTempSigma] = useState(6);
 
   useEffect(() => {
     if (emissionsData.length > 0 && savedPeaks.length > 0) return;
@@ -34,7 +48,7 @@ const Dashboard = () => {
     setError(null);
 
     Promise.all([
-      fetchEmissionData(facility, startDate, endDate),
+      fetchEmissionData(facility, startDate, endDate, nSigma),
       fetchSavedPeaks(facility),
     ])
       .then(([rawResponse, savedResponse]) => {
@@ -51,6 +65,7 @@ const Dashboard = () => {
     facility,
     startDate,
     endDate,
+    nSigma,
     emissionsData.length,
     savedPeaks.length,
     setEmissionsData,
@@ -161,7 +176,19 @@ const Dashboard = () => {
             peaksData={peaksData}
           />
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, mb: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setTempSigma(nSigma);
+                setSigmaModalOpen(true);
+              }}
+              startIcon={<SettingsIcon />}
+              sx={{ px: 2, py: 1 }}
+            >
+              Adjust Threshold (multiplier: {nSigma})
+            </Button>
+
             <Button
               variant="contained"
               onClick={handleSaveToBackend}
@@ -180,6 +207,49 @@ const Dashboard = () => {
           </Box>
         </>
       )}
+
+      <Dialog
+        open={isSigmaModalOpen}
+        onClose={() => setSigmaModalOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: '#f5f5f5' }}>Adjust Threshold Multiplier</DialogTitle>
+        <DialogContent sx={{ pt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography gutterBottom>
+            Threshold Multiplier: <strong>{tempSigma}</strong>
+          </Typography>
+          <Slider
+            value={tempSigma}
+            onChange={(_, newValue) => setTempSigma(newValue as number)}
+            step={1}
+            marks
+            min={1}
+            max={10}
+            valueLabelDisplay="auto"
+            sx={{ color: '#60c9f8' }}
+          />
+          <Typography variant="caption" color="text.secondary">
+            Default is 6.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, bgcolor: '#fafafa' }}>
+          <Button onClick={() => setSigmaModalOpen(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setEmissionsData([]);
+              setNSigma(tempSigma);
+              setSigmaModalOpen(false);
+            }}
+            variant="contained"
+            sx={{ bgcolor: '#60c9f8', color: '#000' }}
+          >
+            Refetch Data
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
