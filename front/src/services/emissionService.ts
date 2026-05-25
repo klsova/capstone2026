@@ -1,4 +1,5 @@
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -23,7 +24,7 @@ export const fetchEmissionData = async (facility: string, startDate: string, end
     const mappedFacility = facilityMap[facility];
 
     const formattedStart = stripTimezone(startDate);
-    const formattedEnd = stripTimezone(endDate);
+    const formattedEnd = stripTimezone(dayjs(endDate).endOf('day').toISOString());
 
     const response = await axios.get(`${API_URL}/emissions`, {
       params: { facility: mappedFacility, startDate: formattedStart, endDate: formattedEnd, n_sigma: nSigma }
