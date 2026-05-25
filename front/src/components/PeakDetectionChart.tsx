@@ -31,6 +31,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useData } from '../context/DataContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { calculatePeakArea } from '../services/emissionService';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -54,6 +55,50 @@ interface EmissionPeak {
   endTime: string;
   notes?: string;
 }
+
+const CustomTooltip = ({ active, payload, label, timeFormat, formattedPeaks }: any) => {
+  if (active && payload && payload.length) {
+    const currentMs = label;
+
+    const activePeak = formattedPeaks.find(
+      (p: any) => currentMs >= p.startMs && currentMs <= p.endMs,
+    );
+
+    return (
+      <Box
+        sx={{
+          bgcolor: 'rgba(255, 255, 255, 0.95)',
+          p: 1.5,
+          border: '1px solid #ccc',
+          borderRadius: 1,
+          boxShadow: '0 2px 5px rgba(0,0,0,0.1',
+        }}
+      >
+        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+          {dayjs(currentMs).format(timeFormat)}
+        </Typography>
+
+        {payload.map((entry: any, index: number) => (
+          <Typography key={index} variant="body2" sx={{ color: entry.color }}>
+            {entry.name} : {entry.value}
+          </Typography>
+        ))}
+
+        {activePeak && activePeak.area !== undefined && (
+          <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed #ccc' }}>
+            <Typography variant="body2" sx={{ color: '#d32f2f', fontWeight: 'bold' }}>
+              Peak Area: {activePeak.area} units
+            </Typography>
+
+            <Typography variant="caption" sx={{ color: '#666' }}>
+              ID: {activePeak.id}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    );
+  }
+};
 
 const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
   facility,
@@ -209,12 +254,19 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
       peaksToKeep = peaksData.filter((p) => !overlappingIds.includes(p.id));
     }
 
+    const newArea = calculatePeakArea(
+      tempStartTime.toISOString(),
+      tempEndTime.toISOString(),
+      emissionsData,
+    );
+
     if (isCreatingNew) {
       const newPeak = {
         id: selectedPeak.id,
         startTime: tempStartTime.toISOString(),
         endTime: tempEndTime.toISOString(),
         notes: tempNotes,
+        area: newArea,
       };
       setPeaksData([...peaksToKeep, newPeak]);
     } else {
@@ -225,6 +277,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
             startTime: tempStartTime.toISOString(),
             endTime: tempEndTime.toISOString(),
             notes: tempNotes,
+            area: newArea,
           };
         }
         return p;
@@ -317,8 +370,16 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                 tick={{ fill: '#666' }}
               />
               <YAxis fontSize={10} tick={{ fill: '#666' }} />
-              <Tooltip
+              {/*               <Tooltip
                 labelFormatter={(unixTime) => dayjs(unixTime).format(timeFormat)}
+              /> */}
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    timeFormat={timeFormat}
+                    formattedPeaks={formattedPeaks}
+                  />
+                }
               />
               {/* Threshold */}
               <Line

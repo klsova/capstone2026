@@ -10,6 +10,24 @@ const facilityMap: Record<string, string> = {
   "PET_Upstairs": "floor_2"
 };
 
+export const calculatePeakArea = (startTime: string, endTime: string, emissions: any[]): number => {
+  const startTimeMs = new Date(startTime).getTime();
+  const endTimeMs = new Date(endTime).getTime();
+  let area = 0;
+
+  emissions.forEach((d: any) => {
+    const timestampMs = new Date(d.timestamp).getTime();
+
+    if (timestampMs >= startTimeMs && timestampMs <= endTimeMs) {
+      if (d.counts > d.threshold) {
+        area += (d.counts - d.threshold);
+      }
+    }
+  });
+
+  return Math.round(area * 100) / 100;
+}
+
 const stripTimezone = (dateStr: string) => {
   if (!dateStr || dateStr === "Invalid Date") return "";
 
@@ -38,7 +56,8 @@ export const fetchEmissionData = async (facility: string, startDate: string, end
       id: `PEAK-${p.peak_id}`,
       startTime: p.peak_start,
       endTime: p.peak_end,
-      severity: 'High'
+      severity: 'High',
+      area: calculatePeakArea(p.peak_start, p.peak_end, emissions)
     }));
 
     return {
