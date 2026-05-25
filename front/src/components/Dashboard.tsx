@@ -3,7 +3,7 @@ import {
   Typography,
   Button,
   CircularProgress,
-  Slider,
+  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -38,7 +38,7 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [nSigma, setNSigma] = useState<number>(6);
   const [isSigmaModalOpen, setSigmaModalOpen] = useState(false);
-  const [tempSigma, setTempSigma] = useState(6);
+  const [tempSigma, setTempSigma] = useState<number | ''>(6);
 
   useEffect(() => {
     if (emissionsData.length > 0 && savedPeaks.length > 0) return;
@@ -215,8 +215,34 @@ const Dashboard = () => {
         fullWidth
       >
         <DialogTitle sx={{ bgcolor: '#f5f5f5' }}>Adjust Threshold Multiplier</DialogTitle>
-        <DialogContent sx={{ pt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography gutterBottom>
+        <DialogContent
+          sx={{ pt: 3, mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
+          <TextField
+            label="Threshold Multiplier"
+            type="number"
+            variant="outlined"
+            fullWidth
+            sx={{ mt: 1 }}
+            value={tempSigma}
+            onChange={(e) => {
+              const val = e.target.value === '' ? '' : Number(e.target.value);
+              setTempSigma(val as number);
+            }}
+            error={tempSigma === '' || tempSigma < 1 || tempSigma > 100}
+            helperText={
+              tempSigma === '' || tempSigma < 1 || tempSigma > 100
+                ? 'Please enter a valid number.'
+                : // Default valuelle ympäristömuuttujasta arvo?
+                  'Default multiplier is 6.'
+            }
+            inputProps={{
+              min: 1,
+              max: 100,
+              step: 1,
+            }}
+          />
+          {/*           <Typography gutterBottom>
             Threshold Multiplier: <strong>{tempSigma}</strong>
           </Typography>
           <Slider
@@ -231,7 +257,7 @@ const Dashboard = () => {
           />
           <Typography variant="caption" color="text.secondary">
             Default is 6.
-          </Typography>
+          </Typography> */}
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: '#fafafa' }}>
           <Button onClick={() => setSigmaModalOpen(false)} color="inherit">
@@ -240,11 +266,16 @@ const Dashboard = () => {
           <Button
             onClick={() => {
               setEmissionsData([]);
-              setNSigma(tempSigma);
+              setNSigma(tempSigma as number);
               setSigmaModalOpen(false);
             }}
             variant="contained"
-            sx={{ bgcolor: '#60c9f8', color: '#000' }}
+            disabled={tempSigma === '' || tempSigma < 1 || tempSigma > 100}
+            sx={{
+              bgcolor: '#60c9f8',
+              color: '#000',
+              '&:disabled': { bgcolor: '#e0e0e0' },
+            }}
           >
             Refetch Data
           </Button>
