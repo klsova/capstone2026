@@ -1,6 +1,5 @@
 import ExcelJS from 'exceljs';
 import dayjs from 'dayjs';
-import { Area } from 'recharts';
 
 //Only for demo test purposes in this stage to have a library and functionality
 //for exporting an excel file. This has no correlation to the actual report generated with

@@ -9,6 +9,7 @@ import {
   AreaChart,
   Area,
   ReferenceArea,
+  ReferenceLine,
   Line,
 } from 'recharts';
 import {
@@ -185,16 +186,20 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
       });
     }
 
-    return peaksToShow.map((peak) => ({
-      ...peak,
-      startMs: dayjs(peak.startTime).valueOf(),
-      endMs: dayjs(peak.endTime).valueOf(),
-      displayStart: dayjs(peak.startTime).format(timeFormat),
-      displayEnd: dayjs(peak.endTime).format(timeFormat),
-    }));
-  }, [peaksData, currentDate, isDailyView, timeFormat]);
+    return peaksToShow.map((peak) => {
+      const startMs = dayjs(peak.startTime).valueOf();
+      const endMs = dayjs(peak.endTime).valueOf();
 
-  //const handlePeakClick = (peak: any) => setSelectedPeak(peak);
+      return {
+        ...peak,
+        startMs,
+        endMs,
+        isSinglePoint: startMs === endMs,
+        displayStart: dayjs(peak.startTime).format(timeFormat),
+        displayEnd: dayjs(peak.endTime).format(timeFormat),
+      };
+    });
+  }, [peaksData, currentDate, isDailyView, timeFormat]);
 
   const handleChartClick = (e: any) => {
     //checks that click is hitting a data point within the chart
@@ -403,18 +408,29 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
                 isAnimationActive={false}
               />
 
-              {formattedPeaks.map((peak, index) => (
-                <ReferenceArea
-                  key={index}
-                  x1={peak.startMs}
-                  x2={peak.endMs}
-                  fill="#f44336"
-                  fillOpacity={0.2}
-                  stroke="#f44336"
-                  strokeOpacity={0.6}
-                  cursor="pointer"
-                />
-              ))}
+              {formattedPeaks.map((peak, index) =>
+                peak.isSinglePoint ? (
+                  <ReferenceLine
+                    key={`line-${index}`}
+                    x={peak.startMs}
+                    stroke="#f44336"
+                    strokeWidth={4}
+                    strokeOpacity={0.8}
+                    cursor="pointer"
+                  />
+                ) : (
+                  <ReferenceArea
+                    key={`area-${index}`}
+                    x1={peak.startMs}
+                    x2={peak.endMs}
+                    fill="#f44336"
+                    fillOpacity={0.2}
+                    stroke="#f44336"
+                    strokeOpacity={0.6}
+                    cursor="pointer"
+                  />
+                ),
+              )}
 
               <Brush
                 dataKey="timeMs"
