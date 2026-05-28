@@ -22,6 +22,38 @@ interface WeeklyPeakEmissionsProps {
 
 // MBQ constant divider, possibly put into env variable?
 const MBQ_CONSTANT = 34.28;
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const weekData = payload[0].payload;
+    const counts = weekData.area;
+    const mbq = (counts / MBQ_CONSTANT).toFixed(2);
+
+    return (
+      <Box
+        sx={{
+          bgcolor: 'rgba(255, 255, 255, 0.95)',
+          p: 1.5,
+          border: '1px solid #ccc',
+          borderRadius: 1,
+          boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        }}
+      >
+        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+          {label}
+        </Typography>
+
+        <Typography variant="body2" sx={{ color: '#ff9800', mb: 0.5 }}>
+          Total Area (Counts) : {counts}
+        </Typography>
+
+        <Typography variant="body2" sx={{ color: '#1976d2' }}>
+          Total Area (MBq) : {mbq} MBq
+        </Typography>
+      </Box>
+    );
+  }
+  return null;
+};
 
 const WeeklyPeakEmissions: React.FC<WeeklyPeakEmissionsProps> = ({ savedPeaks }) => {
   const weeklyData = useMemo(() => {
@@ -78,7 +110,7 @@ const WeeklyPeakEmissions: React.FC<WeeklyPeakEmissionsProps> = ({ savedPeaks })
               orientation="right"
               fontSize={11}
               tick={{ fill: '#1976d2' }}
-              tickFormatter={(val) => val.toFixed(1)}
+              tickFormatter={(val) => (val / MBQ_CONSTANT).toFixed(1)}
               label={{
                 value: 'MBq',
                 angle: 90,
@@ -87,13 +119,7 @@ const WeeklyPeakEmissions: React.FC<WeeklyPeakEmissionsProps> = ({ savedPeaks })
               }}
             />
 
-            <Tooltip
-              cursor={{ fill: '#f5f5f5' }}
-              formatter={(value: any, name: any) => {
-                if (name === 'areaMBq') return [`${value} MBq`, 'Total Area (MBq)'];
-                return [`${value} units`, 'Total Area (Counts)'];
-              }}
-            />
+            <Tooltip cursor={{ fill: '#f5f5f5' }} content={<CustomTooltip />} />
 
             <Bar
               yAxisId="left"
@@ -113,7 +139,7 @@ const WeeklyPeakEmissions: React.FC<WeeklyPeakEmissionsProps> = ({ savedPeaks })
             <Line
               yAxisId="right"
               type="monotone"
-              dataKey="areaMBq"
+              dataKey="area"
               stroke="transparent"
               dot={false}
               activeDot={false}
