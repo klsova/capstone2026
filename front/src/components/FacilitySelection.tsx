@@ -14,6 +14,7 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate } from 'react-router-dom';
 import dayjs, { Dayjs } from 'dayjs';
+import 'dayjs/locale/en-gb';
 import { useData } from '../context/DataContext';
 
 const FacilitySelection = () => {
@@ -47,7 +48,7 @@ const FacilitySelection = () => {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
       <Box
         sx={{
           display: 'flex',
@@ -83,12 +84,14 @@ const FacilitySelection = () => {
               label="Start Date"
               value={startDate}
               onChange={(newValue) => setStartDate(newValue)}
+              format="DD.MM.YYYY"
             />
 
             <DatePicker
               label="End Date"
               value={endDate}
               onChange={(newValue) => setEndDate(newValue)}
+              format="DD.MM.YYYY"
             />
 
             <Button
