@@ -4,11 +4,11 @@ import dayjs from 'dayjs';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // names used on backend, unify later
-const facilityMap: Record<string, string> = {
+/* const facilityMap: Record<string, string> = {
   "Aurum": "aurum",
   "PET_Downstairs": "rk_2",
   "PET_Upstairs": "floor_2"
-};
+}; */
 
 export const calculatePeakArea = (startTime: string, endTime: string, emissions: any[]): number => {
   const startTimeMs = new Date(startTime).getTime();
@@ -39,7 +39,7 @@ const stripTimezone = (dateStr: string) => {
 
 export const fetchEmissionData = async (facility: string, startDate: string, endDate: string, nSigma: number = 6) => {
   try {
-    const mappedFacility = facilityMap[facility];
+    //const mappedFacility = facilityMap[facility];
 
     // const formattedStart = stripTimezone(startDate);
     // const formattedEnd = stripTimezone(endDate);
@@ -49,7 +49,7 @@ export const fetchEmissionData = async (facility: string, startDate: string, end
 
 
     const response = await axios.get(`${API_URL}/emissions`, {
-      params: { facility: mappedFacility, startDate: formattedStart, endDate: formattedEnd, n_sigma: nSigma }
+      params: { facility: facility, startDate: formattedStart, endDate: formattedEnd, n_sigma: nSigma }
     });
 
     const responseData = response.data;

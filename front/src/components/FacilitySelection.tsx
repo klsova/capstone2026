@@ -78,9 +78,9 @@ const FacilitySelection = () => {
                 label="Select Facility"
                 onChange={(e) => setFacility(e.target.value)}
               >
-                <MenuItem value="Aurum">Aurum</MenuItem>
-                <MenuItem value="PET_Downstairs">PET Centre Downstairs</MenuItem>
-                <MenuItem value="PET_Upstairs">PET Centre Upstairs</MenuItem>
+                <MenuItem value="aurum">aurum</MenuItem>
+                <MenuItem value="rk_2">rk2</MenuItem>
+                <MenuItem value="floor_2">2ndfloor</MenuItem>
               </Select>
             </FormControl>
 
