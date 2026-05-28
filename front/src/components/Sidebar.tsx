@@ -45,7 +45,7 @@ const Sidebar = () => {
   const menuItems = [
     { text: 'Dashboard', path: '/dashboard' },
     { text: 'Reports', path: '/reports' },
-    { text: 'Notifications', path: '/notifications' },
+    // { text: 'Notifications', path: '/notifications' },
     { text: 'Settings', path: '/settings' },
   ];
 
