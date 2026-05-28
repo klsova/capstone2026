@@ -10,7 +10,7 @@ import {
   Button,
   Stack,
 } from '@mui/material';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate } from 'react-router-dom';
 import dayjs, { Dayjs } from 'dayjs';
@@ -29,14 +29,18 @@ const FacilitySelection = () => {
   } = useData();
 
   const [facility, setFacility] = useState('');
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs('2025-07-18'));
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs('2025-07-20'));
+  const [startDate, setStartDate] = useState<Dayjs | null>(
+    dayjs('2025-07-18').startOf('day'),
+  );
+  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs('2025-07-20').endOf('day'));
 
   const handleStart = () => {
     if (facility && startDate && endDate) {
       setGlobalFacility(facility);
-      setGlobalStart(startDate.toISOString());
-      setGlobalEnd(endDate.toISOString());
+      setGlobalStart(startDate.format('YYYY-MM-DDTHH:mm:ss'));
+      setGlobalEnd(endDate.format('YYYY-MM-DDTHH:mm:ss'));
+      /*       setGlobalStart(startDate.toISOString());
+      setGlobalEnd(endDate.toISOString()); */
 
       setEmissionsData([]);
       setPeaksData([]);
@@ -80,18 +84,20 @@ const FacilitySelection = () => {
               </Select>
             </FormControl>
 
-            <DatePicker
+            <DateTimePicker
               label="Start Date"
               value={startDate}
               onChange={(newValue) => setStartDate(newValue)}
-              format="DD.MM.YYYY"
+              format="DD.MM.YYYY HH:mm"
+              ampm={false}
             />
 
-            <DatePicker
+            <DateTimePicker
               label="End Date"
               value={endDate}
               onChange={(newValue) => setEndDate(newValue)}
-              format="DD.MM.YYYY"
+              format="DD.MM.YYYY HH:mm"
+              ampm={false}
             />
 
             <Button

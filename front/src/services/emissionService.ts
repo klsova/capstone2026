@@ -41,8 +41,12 @@ export const fetchEmissionData = async (facility: string, startDate: string, end
   try {
     const mappedFacility = facilityMap[facility];
 
-    const formattedStart = stripTimezone(startDate);
-    const formattedEnd = stripTimezone(dayjs(endDate).endOf('day').toISOString());
+    // const formattedStart = stripTimezone(startDate);
+    // const formattedEnd = stripTimezone(endDate);
+    const formattedStart = dayjs(startDate).format('YYYY-MM-DD HH:mm:ss');
+    const formattedEnd = dayjs(endDate).format('YYYY-MM-DD HH:mm:ss');
+
+
 
     const response = await axios.get(`${API_URL}/emissions`, {
       params: { facility: mappedFacility, startDate: formattedStart, endDate: formattedEnd, n_sigma: nSigma }
