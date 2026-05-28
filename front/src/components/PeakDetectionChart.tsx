@@ -37,6 +37,9 @@ import { calculatePeakArea } from '../services/emissionService';
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
+// demo purposes hard-coded MBq divider
+const MBQ_CONSTANT = 34.28;
+
 interface PeakDetectionChartProps {
   facility: string;
   startDate: string;
@@ -88,7 +91,11 @@ const CustomTooltip = ({ active, payload, label, timeFormat, formattedPeaks }: a
         {activePeak && activePeak.area !== undefined && (
           <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed #ccc' }}>
             <Typography variant="body2" sx={{ color: '#d32f2f', fontWeight: 'bold' }}>
-              Peak Area: {activePeak.area} units
+              Peak Area (Counts): {activePeak.area}
+            </Typography>
+
+            <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+              Peak Area (MBq) : {(activePeak.area / MBQ_CONSTANT).toFixed(2)}
             </Typography>
 
             <Typography variant="caption" sx={{ color: '#666' }}>
