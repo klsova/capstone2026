@@ -32,8 +32,8 @@ const Charts: React.FC<ChartsProps> = ({
 
       {/*Kumulaatiokaavio*/}
       <Grid size={6}>
-        <ChartCard title="Cumulative Sum" height={350}>
-          <CumulativeChart startDate={startDate} endDate={endDate} />
+        <ChartCard title="Cumulative Sum [MBq]" height={350}>
+          <CumulativeChart savedPeaks={savedPeaks} />
         </ChartCard>
       </Grid>
 
