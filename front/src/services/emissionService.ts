@@ -10,6 +10,28 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
   "PET_Upstairs": "floor_2"
 }; */
 
+export const fetchMbqConstant = async (facility: string): Promise<number> => {
+  try {
+    const response = await axios.get(`${API_URL}/constant/${facility}`);
+    return response.data.mbq_constant;
+  } catch (error) {
+    console.error("Error fetching MBq constant:", error);
+    return 34.28;
+  }
+};
+
+export const saveMbqConstant = async (facility: string, newValue: number): Promise<void> => {
+  try {
+    await axios.post(`${API_URL}/constant`, {
+      facility: facility,
+      new_value: newValue
+    });
+  } catch (error) {
+    console.error("Error updating MBq constant:", error);
+    throw error;
+  }
+};
+
 export const calculatePeakArea = (startTime: string, endTime: string, emissions: any[]): number => {
   const startTimeMs = new Date(startTime).getTime();
   const endTimeMs = new Date(endTime).getTime();

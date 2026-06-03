@@ -1,5 +1,12 @@
-import React, { createContext, useState, useContext, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  type ReactNode,
+} from 'react';
 import dayjs from 'dayjs';
+import { fetchMbqConstant } from '../services/emissionService';
 
 interface DataContextType {
   facility: string;
@@ -14,6 +21,8 @@ interface DataContextType {
   setPeaksData: (data: any[]) => void;
   savedPeaks: any[];
   setSavedPeaks: (data: any[]) => void;
+  mbqConstant: number;
+  setMbqConstant: (val: number) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -25,6 +34,20 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [endDate, setEndDate] = useState(dayjs().toISOString());
   const [emissionsData, setEmissionsData] = useState<any[]>([]);
   const [peaksData, setPeaksData] = useState<any[]>([]);
+  const [mbqConstant, setMbqConstant] = useState<number>(34.28);
+
+  useEffect(() => {
+    if (facility && facility !== 'Not Selected') {
+      fetchMbqConstant(facility)
+        .then((val) => {
+          setMbqConstant(val);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch MBq constant, using fallback value.', err);
+          setMbqConstant(34.28);
+        });
+    }
+  }, [facility]);
 
   return (
     <DataContext.Provider
@@ -41,6 +64,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setPeaksData,
         savedPeaks,
         setSavedPeaks,
+        mbqConstant,
+        setMbqConstant,
       }}
     >
       {children}

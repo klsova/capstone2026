@@ -1,11 +1,44 @@
-import React, { useState } from 'react';
-import { Box, Typography, Paper, TextField, Button, Stack, Divider } from '@mui/material';
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  Stack,
+  Divider,
+  Alert,
+} from '@mui/material';
+import { useData } from '../context/DataContext';
+import { saveMbqConstant } from '../services/emissionService';
 
 const Settings = () => {
-  const [mbqDivider, setMbqDivider] = useState('34.280');
+  const { facility, mbqConstant, setMbqConstant } = useData();
+  const [localDivider, setLocalDivider] = useState<string>('');
+  const [statusMsg, setStatusMsg] = useState<string>('');
 
-  const handleSave = () => {
-    alert(`New MBq divider constant (${mbqDivider}) saved! (Demo)`);
+  const isValidFacility = facility && facility !== 'Not Selected';
+
+  useEffect(() => {
+    if (mbqConstant) {
+      setLocalDivider(mbqConstant.toString());
+    }
+  }, [mbqConstant]);
+
+  const handleSave = async () => {
+    if (!isValidFacility) {
+      setStatusMsg('Facility not selected');
+      return;
+    }
+
+    try {
+      const numericValue = parseFloat(localDivider);
+      await saveMbqConstant(facility, numericValue);
+      setMbqConstant(numericValue);
+      setStatusMsg(`Successfully updated constant for ${facility} to ${numericValue}`);
+    } catch (e) {
+      setStatusMsg('Error trying to save the constant to the server.');
+    }
   };
 
   return (
@@ -18,6 +51,9 @@ const Settings = () => {
         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
           Data Calculation Constants
         </Typography>
+        <Typography variant="body2" sx={{ color: '#666', mb: 3 }}>
+          Current facility: <strong>{facility || 'Not selected'}</strong>
+        </Typography>
 
         <Divider sx={{ mb: 4 }} />
 
@@ -26,20 +62,25 @@ const Settings = () => {
             label="MBq Divider Constant"
             type="number"
             variant="outlined"
-            value={mbqDivider}
-            onChange={(e) => setMbqDivider(e.target.value)}
+            value={localDivider}
+            onChange={(e) => setLocalDivider(e.target.value)}
             fullWidth
-            helperText="Current default value: 34.280"
-            InputLabelProps={{
-              shrink: true,
-            }}
+            disabled={!isValidFacility}
           />
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
             <Button
               variant="contained"
               size="large"
               onClick={handleSave}
+              disabled={!isValidFacility}
               sx={{
                 bgcolor: '#60c9f8',
                 color: 'white',
@@ -51,6 +92,7 @@ const Settings = () => {
               Save Changes
             </Button>
           </Box>
+          {statusMsg && <Alert severity="info">{statusMsg}</Alert>}
         </Stack>
       </Paper>
     </Box>
