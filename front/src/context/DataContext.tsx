@@ -36,6 +36,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [peaksData, setPeaksData] = useState<any[]>([]);
   const [mbqConstant, setMbqConstant] = useState<number>(34.28);
 
+  // Fetches the active facility-specific MBq conversion multiplier whenever
+  // the facility changes.
   useEffect(() => {
     if (facility && facility !== 'Not Selected') {
       fetchMbqConstant(facility)

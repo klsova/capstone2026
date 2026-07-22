@@ -245,6 +245,7 @@ const PeakDetectionChart: React.FC<PeakDetectionChartProps> = ({
     const newStartMs = tempStartTime.valueOf();
     const newEndMs = tempEndTime.valueOf();
 
+    // Checks if manually edited or added peak overlaps with existing ones
     const overlappingPeaks = peaksData.filter((p) => {
       if (!isCreatingNew && p.id === selectedPeak.id) return false;
 

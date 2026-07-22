@@ -78,7 +78,7 @@ const Dashboard = () => {
     exportToExcel(peaksWithArea, facility);
   };
 
-  // adds area calc to approved peaks before they are saved
+  // Calculates the area (couts - threshold) for approved peaks before saving or exporting.
   const addAreaToApprovedPeaks = (peaks: any[], rawData: any[]) => {
     return peaks.map((peak) => {
       const startMs = dayjs(peak.startTime).valueOf();

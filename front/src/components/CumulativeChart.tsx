@@ -54,6 +54,8 @@ const CumulativeChart: React.FC<CumulativeChartProps> = ({ savedPeaks }) => {
       }
     });
 
+    // Iterates through all weeks to calculate a running cumulative
+    // sum of MBq emissions to be compared against the annual limit
     let runningSumMBq = 0;
 
     return weeks.map((w) => {
