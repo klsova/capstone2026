@@ -3,13 +3,6 @@ import dayjs from 'dayjs';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-// names used on backend, unify later
-/* const facilityMap: Record<string, string> = {
-  "Aurum": "aurum",
-  "PET_Downstairs": "rk_2",
-  "PET_Upstairs": "floor_2"
-}; */
-
 export const fetchMbqConstant = async (facility: string): Promise<number> => {
   try {
     const response = await axios.get(`${API_URL}/constant/${facility}`);
@@ -50,26 +43,10 @@ export const calculatePeakArea = (startTime: string, endTime: string, emissions:
   return Math.round(area * 100) / 100;
 }
 
-const stripTimezone = (dateStr: string) => {
-  if (!dateStr || dateStr === "Invalid Date") return "";
-
-  const dateObj = new Date(dateStr);
-  if (isNaN(dateObj.getTime())) return "";
-
-  return dateObj.toISOString().substring(0, 19).replace('T', ' ');
-};
-
 export const fetchEmissionData = async (facility: string, startDate: string, endDate: string, nSigma: number = 6) => {
   try {
-    //const mappedFacility = facilityMap[facility];
-
-    // const formattedStart = stripTimezone(startDate);
-    // const formattedEnd = stripTimezone(endDate);
     const formattedStart = dayjs(startDate).format('YYYY-MM-DD HH:mm:ss');
     const formattedEnd = dayjs(endDate).format('YYYY-MM-DD HH:mm:ss');
-
-
-
     const response = await axios.get(`${API_URL}/emissions`, {
       params: { facility: facility, startDate: formattedStart, endDate: formattedEnd, n_sigma: nSigma }
     });

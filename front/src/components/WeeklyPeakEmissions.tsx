@@ -20,8 +20,11 @@ interface WeeklyPeakEmissionsProps {
   savedPeaks: any[];
 }
 
-// MBQ constant divider, possibly put into env variable?
+// MBQ constant divider/calibration factor, possibly put into env variable?
 const MBQ_CONSTANT = 34.28;
+
+const WEEKS_IN_YEAR = 53;
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const weekData = payload[0].payload;
@@ -57,7 +60,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const WeeklyPeakEmissions: React.FC<WeeklyPeakEmissionsProps> = ({ savedPeaks }) => {
   const weeklyData = useMemo(() => {
-    const weeks = Array.from({ length: 53 }, (_, i) => ({
+    const weeks = Array.from({ length: WEEKS_IN_YEAR }, (_, i) => ({
       week: `W${i + 1}`,
       area: 0,
     }));

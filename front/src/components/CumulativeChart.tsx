@@ -2,14 +2,11 @@ import React, { useMemo, useState } from 'react';
 import {
   ComposedChart,
   Line,
-  Scatter,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  // Area,
 } from 'recharts';
 import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import dayjs from 'dayjs';
@@ -23,8 +20,10 @@ interface CumulativeChartProps {
 // TODO: possibly take the constant from env variable?
 const MBQ_CONSTANT = 34.28;
 
-// TODO: Change to actual weekly limit, this is approx taken from the report
+// Approximation of weekly limit just for presentation purposes
 const WEEKLY_LIMIT_MBQ = 10000;
+
+const WEEKS_IN_YEAR = 53;
 
 const CumulativeChart: React.FC<CumulativeChartProps> = ({ savedPeaks }) => {
   const [view, setView] = useState<'daily' | 'weekly'>('weekly');
@@ -37,7 +36,7 @@ const CumulativeChart: React.FC<CumulativeChartProps> = ({ savedPeaks }) => {
   };
 
   const weeklyData = useMemo(() => {
-    const weeks = Array.from({ length: 53 }, (_, i) => ({
+    const weeks = Array.from({ length: WEEKS_IN_YEAR }, (_, i) => ({
       week: `W${i + 1}`,
       areaCounts: 0,
       cumulativeMBq: 0,
@@ -121,13 +120,6 @@ const CumulativeChart: React.FC<CumulativeChartProps> = ({ savedPeaks }) => {
               strokeDasharray="5 5"
               name="limit"
             />
-
-            {/*             <Scatter
-              dataKey="cumulativeMBq"
-              fill="#60c9f8"
-              name="cumulativeMBq"
-              legendType="none"
-            /> */}
 
             <Line
               type="stepAfter"
