@@ -8,8 +8,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Charts from './Charts';
 import dayjs from 'dayjs';
@@ -39,6 +43,16 @@ const Dashboard = () => {
   const [nSigma, setNSigma] = useState<number>(6);
   const [isSigmaModalOpen, setSigmaModalOpen] = useState(false);
   const [tempSigma, setTempSigma] = useState<number | ''>(6);
+  const [reportYear, setReportYear] = useState<number>(dayjs().year());
+
+  const availableYears = useMemo(() => {
+    const currentYear = dayjs().year();
+    return Array.from({ length: currentYear - 2025 + 1 }, (_, i) => currentYear - i);
+  }, []);
+
+  const annualPeaks = useMemo(() => {
+    return savedPeaks.filter((peak) => dayjs(peak.startTime).year() === reportYear);
+  }, [savedPeaks, reportYear]);
 
   useEffect(() => {
     if (emissionsData.length > 0 && savedPeaks.length > 0) return;
@@ -152,14 +166,32 @@ const Dashboard = () => {
           </Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          onClick={handleExport}
-          disabled={peaksData.length === 0 || loading}
-          sx={{ bgcolor: '#60c9f8', '&:hover': { bgcolor: '#4fb8e7' }, px: 4, py: 1 }}
-        >
-          Export Report
-        </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Report Year</InputLabel>
+            <Select
+              value={reportYear}
+              label="Report Year"
+              onChange={(e) => setReportYear(Number(e.target.value))}
+              sx={{ bgcolor: 'white' }}
+            >
+              {availableYears.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button
+            variant="contained"
+            onClick={handleExport}
+            disabled={peaksData.length === 0 || loading}
+            sx={{ bgcolor: '#60c9f8', '&:hover': { bgcolor: '#4fb8e7' }, px: 4, py: 1 }}
+          >
+            Export Report
+          </Button>
+        </Box>
       </Box>
 
       {loading ? (
@@ -174,6 +206,7 @@ const Dashboard = () => {
             endDate={endDate}
             emissionsData={emissionsData}
             peaksData={peaksData}
+            annualPeaks={annualPeaks}
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>

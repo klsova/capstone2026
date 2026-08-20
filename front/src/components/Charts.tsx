@@ -3,7 +3,6 @@ import CumulativeChart from './CumulativeChart';
 import PeakDetectionChart from './PeakDetectionChart';
 import WeeklyPeakEmissions from './WeeklyPeakEmissions';
 import ChartCard from './ChartCard';
-import { useData } from '../context/DataContext';
 
 interface ChartsProps {
   facility: string;
@@ -11,6 +10,7 @@ interface ChartsProps {
   endDate: string;
   emissionsData: any[];
   peaksData: any[];
+  annualPeaks: any[];
 }
 
 const Charts: React.FC<ChartsProps> = ({
@@ -19,21 +19,20 @@ const Charts: React.FC<ChartsProps> = ({
   endDate,
   emissionsData,
   peaksData,
+  annualPeaks,
 }) => {
-  console.log(facility, startDate, endDate);
-  const { savedPeaks } = useData();
   return (
     <Grid container spacing={3}>
       <Grid size={6}>
         <ChartCard title="Weekly Peak Emissions" height={350}>
-          <WeeklyPeakEmissions savedPeaks={savedPeaks} />
+          <WeeklyPeakEmissions savedPeaks={annualPeaks} />
         </ChartCard>
       </Grid>
 
       {/*Kumulaatiokaavio*/}
       <Grid size={6}>
         <ChartCard title="Cumulative Sum [MBq]" height={350}>
-          <CumulativeChart savedPeaks={savedPeaks} />
+          <CumulativeChart savedPeaks={annualPeaks} />
         </ChartCard>
       </Grid>
 
