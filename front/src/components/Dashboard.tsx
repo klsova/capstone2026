@@ -36,13 +36,14 @@ const Dashboard = () => {
     setPeaksData,
     savedPeaks,
     setSavedPeaks,
+    mbqConstant,
   } = useData();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [nSigma, setNSigma] = useState<number>(6);
+  const [nSigma, setNSigma] = useState<number>(2);
   const [isSigmaModalOpen, setSigmaModalOpen] = useState(false);
-  const [tempSigma, setTempSigma] = useState<number | ''>(6);
+  const [tempSigma, setTempSigma] = useState<number | ''>(2);
   const [reportYear, setReportYear] = useState<number>(dayjs().year());
 
   const availableYears = useMemo(() => {
@@ -88,8 +89,8 @@ const Dashboard = () => {
   ]);
 
   const handleExport = () => {
-    const peaksWithArea = addAreaToApprovedPeaks(peaksData, emissionsData);
-    exportToExcel(peaksWithArea, facility);
+    //const peaksWithArea = addAreaToApprovedPeaks(peaksData, emissionsData);
+    exportToExcel(annualPeaks, facility, reportYear, mbqConstant);
   };
 
   // Calculates the area (couts - threshold) for approved peaks before saving or exporting.
@@ -267,7 +268,7 @@ const Dashboard = () => {
               tempSigma === '' || tempSigma < 1 || tempSigma > 100
                 ? 'Please enter a valid number.'
                 : // Default valuelle ympäristömuuttujasta arvo?
-                  'Default multiplier is 6.'
+                  'Default multiplier is 2.'
             }
             inputProps={{
               min: 1,
