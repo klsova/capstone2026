@@ -43,7 +43,7 @@ export const calculatePeakArea = (startTime: string, endTime: string, emissions:
   return Math.round(area * 100) / 100;
 }
 
-export const fetchEmissionData = async (facility: string, startDate: string, endDate: string, nSigma: number = 6) => {
+export const fetchEmissionData = async (facility: string, startDate: string, endDate: string, nSigma: number = 2) => {
   try {
     const formattedStart = dayjs(startDate).format('YYYY-MM-DD HH:mm:ss');
     const formattedEnd = dayjs(endDate).format('YYYY-MM-DD HH:mm:ss');
